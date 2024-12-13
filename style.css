@@ -1,0 +1,126 @@
+body {
+  background: #1a1a1a;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+  max-width: 1200px;
+  text-align: center;
+  padding: 20px;
+}
+
+.roulette-table {
+  border-collapse: collapse;
+  margin: 20px auto;
+  text-align: center;
+}
+
+.roulette-table td {
+  padding: 5px;
+}
+
+.bet-spot {
+  background: #444;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.zero {
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  color: #fff;
+  background: green;
+}
+
+.number {
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  color: #fff;
+}
+
+.column,
+.dozen,
+.simple {
+  background: #222;
+  color: #fff;
+  text-align: center;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  font-weight: bold;
+  height: 50px;
+  line-height: 50px;
+}
+
+.bet-spot:hover {
+  background: #777;
+}
+
+/* Chip Selection */
+.chip-selection {
+  margin: 20px;
+}
+
+.chip {
+  margin: 5px;
+  padding: 10px 20px;
+  background: #444;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.chip:hover {
+  background: #555;
+}
+
+/* Spin Button */
+.controls {
+  margin: 20px;
+}
+
+.controls button {
+  padding: 10px 20px;
+  background: #555;
+  color: #fff;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.controls button:hover {
+  background: #777;
+}
+
+/* Bet Summary */
+.bet-summary {
+  background: #222;
+  color: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 20px;
+  text-align: left;
+  max-width: 800px;
+}
+
+.bet-spot.winner {
+  border-color: gold;
+  box-shadow: 0 0 15px 3px gold;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+h2 {
+  color: white;
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 10px;
+}
