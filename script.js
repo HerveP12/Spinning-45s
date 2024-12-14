@@ -12,6 +12,24 @@ document.addEventListener("DOMContentLoaded", () => {
   document.body.prepend(timerDisplay);
   document.body.prepend(spinning45sCounterDisplay);
 
+  // Toggle button and rules container
+  const rulesToggle = document.getElementById("rules-toggle");
+  const rulesContainer = document.getElementById("rules-container");
+
+  // Toggle the visibility of the rules container
+  rulesToggle.addEventListener("click", () => {
+    if (
+      rulesContainer.style.display === "none" ||
+      !rulesContainer.style.display
+    ) {
+      rulesContainer.style.display = "block";
+      rulesToggle.textContent = "Hide Rules";
+    } else {
+      rulesContainer.style.display = "none";
+      rulesToggle.textContent = "Show Rules";
+    }
+  });
+
   const wheelNumbers = [
     "00",
     "0",
@@ -190,6 +208,34 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  function highlightWinningSpots(winningNumber) {
+    betSpots.forEach((spot) => {
+      spot.classList.remove("winner");
+      const spotKey = spot.dataset.number || spot.dataset.bet;
+
+      if (spotKey === winningNumber) {
+        spot.classList.add("winner");
+      }
+
+      if (
+        (redNumbers.includes(winningNumber) && spotKey === "red") ||
+        (blackNumbers.includes(winningNumber) && spotKey === "black") ||
+        (parseInt(winningNumber) >= 1 &&
+          parseInt(winningNumber) <= 18 &&
+          spotKey === "1-18") ||
+        (parseInt(winningNumber) >= 19 &&
+          parseInt(winningNumber) <= 36 &&
+          spotKey === "19-36") ||
+        (parseInt(winningNumber) % 2 === 0 &&
+          parseInt(winningNumber) > 0 &&
+          spotKey === "even") ||
+        (parseInt(winningNumber) % 2 !== 0 && spotKey === "odd")
+      ) {
+        spot.classList.add("winner");
+      }
+    });
+  }
+
   function resolveSpinning45s(winningNumber) {
     const value = parseInt(winningNumber) || 0;
     spinning45sCounter += value;
@@ -223,11 +269,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function resolveBets(winningNumber) {
+    highlightWinningSpots(winningNumber);
     resolveSpinning45s(winningNumber);
 
-    // Highlight winning spots and calculate payouts
     betSpots.forEach((spot) => {
-      spot.classList.remove("winner");
       const spotKey = spot.dataset.number || spot.dataset.bet;
       const betAmount = bets[spotKey] || 0;
 
@@ -235,43 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (spotKey === winningNumber) {
           spot.classList.add("winner");
           balance += betAmount * (payouts.single + 1);
-        } else if (
-          (redNumbers.includes(winningNumber) && spotKey === "red") ||
-          (blackNumbers.includes(winningNumber) && spotKey === "black") ||
-          (parseInt(winningNumber) >= 1 &&
-            parseInt(winningNumber) <= 18 &&
-            spotKey === "1-18") ||
-          (parseInt(winningNumber) >= 19 &&
-            parseInt(winningNumber) <= 36 &&
-            spotKey === "19-36") ||
-          (parseInt(winningNumber) % 2 === 0 &&
-            parseInt(winningNumber) > 0 &&
-            spotKey === "even") ||
-          (parseInt(winningNumber) % 2 !== 0 && spotKey === "odd")
-        ) {
-          spot.classList.add("winner");
-          balance += betAmount * (payouts.color + 1);
-        } else if (
-          spotKey === "2to1-left" &&
-          [
-            "3",
-            "6",
-            "9",
-            "12",
-            "15",
-            "18",
-            "21",
-            "24",
-            "27",
-            "30",
-            "33",
-            "36",
-          ].includes(winningNumber)
-        ) {
-          spot.classList.add("winner");
-          balance += betAmount * (payouts.column + 1);
         }
-        // Add other bet types (split, corner, line, etc.)
       }
     });
 
