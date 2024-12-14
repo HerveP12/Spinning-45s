@@ -278,8 +278,116 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (betAmount > 0) {
         if (spotKey === winningNumber) {
-          spot.classList.add("winner");
+          // Straight Bet (Single Number)
           balance += betAmount * (payouts.single + 1);
+        } else if (
+          (redNumbers.includes(winningNumber) && spotKey === "red") ||
+          (blackNumbers.includes(winningNumber) && spotKey === "black")
+        ) {
+          // Red or Black Bet
+          balance += betAmount * (payouts.color + 1);
+        } else if (
+          spotKey === "1-18" &&
+          parseInt(winningNumber) >= 1 &&
+          parseInt(winningNumber) <= 18
+        ) {
+          // Low Bet (1-18)
+          balance += betAmount * (payouts.highLow + 1);
+        } else if (
+          spotKey === "19-36" &&
+          parseInt(winningNumber) >= 19 &&
+          parseInt(winningNumber) <= 36
+        ) {
+          // High Bet (19-36)
+          balance += betAmount * (payouts.highLow + 1);
+        } else if (
+          spotKey === "even" &&
+          parseInt(winningNumber) > 0 &&
+          parseInt(winningNumber) % 2 === 0
+        ) {
+          // Even Bet
+          balance += betAmount * (payouts.oddEven + 1);
+        } else if (spotKey === "odd" && parseInt(winningNumber) % 2 !== 0) {
+          // Odd Bet
+          balance += betAmount * (payouts.oddEven + 1);
+        } else if (
+          spotKey === "1st12" &&
+          parseInt(winningNumber) >= 1 &&
+          parseInt(winningNumber) <= 12
+        ) {
+          // 1st Dozen Bet
+          balance += betAmount * (payouts.dozen + 1);
+        } else if (
+          spotKey === "2nd12" &&
+          parseInt(winningNumber) >= 13 &&
+          parseInt(winningNumber) <= 24
+        ) {
+          // 2nd Dozen Bet
+          balance += betAmount * (payouts.dozen + 1);
+        } else if (
+          spotKey === "3rd12" &&
+          parseInt(winningNumber) >= 25 &&
+          parseInt(winningNumber) <= 36
+        ) {
+          // 3rd Dozen Bet
+          balance += betAmount * (payouts.dozen + 1);
+        } else if (
+          spotKey === "2to1-left" &&
+          [
+            "3",
+            "6",
+            "9",
+            "12",
+            "15",
+            "18",
+            "21",
+            "24",
+            "27",
+            "30",
+            "33",
+            "36",
+          ].includes(winningNumber)
+        ) {
+          // Left Column Bet
+          balance += betAmount * (payouts.column + 1);
+        } else if (
+          spotKey === "2to1-middle" &&
+          [
+            "2",
+            "5",
+            "8",
+            "11",
+            "14",
+            "17",
+            "20",
+            "23",
+            "26",
+            "29",
+            "32",
+            "35",
+          ].includes(winningNumber)
+        ) {
+          // Middle Column Bet
+          balance += betAmount * (payouts.column + 1);
+        } else if (
+          spotKey === "2to1-right" &&
+          [
+            "1",
+            "4",
+            "7",
+            "10",
+            "13",
+            "16",
+            "19",
+            "22",
+            "25",
+            "28",
+            "31",
+            "34",
+          ].includes(winningNumber)
+        ) {
+          // Right Column Bet
+          balance += betAmount * (payouts.column + 1);
         }
       }
     });
