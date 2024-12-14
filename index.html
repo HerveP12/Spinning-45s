@@ -1,15 +1,97 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
-    <title>Interactive Roulette Game</title>
+    <title>Spinning 45s Side Bet</title>
+    <style>
+      #rules-container {
+        background-color: #f1f1f1;
+        color: #333; /* Dark text for better visibility */
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-top: 15px;
+        border-radius: 5px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.6;
+        text-align: left; /* Align text to the left */
+      }
+      #rules-toggle {
+        margin-top: 10px;
+        padding: 10px;
+        font-size: 14px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      #rules-toggle:hover {
+        background-color: #0056b3;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
-      <h1>Interactive Roulette Game</h1>
-      <h2 id="timer-display">Place your bets!</h2>
+      <!-- Toggle Button for Game Rules -->
+      <button id="rules-toggle">Show Rules</button>
+      <div id="rules-container" style="display: none">
+        <h3>Spinning 45s Rules</h3>
+        <p>
+          <strong>How it works:</strong> Place a bet on the "Spinning 45s" bet
+          spot. A counter starts at 0 and increases with the numbers spun after
+          each round.
+        </p>
+        <p>
+          <strong>Payouts:</strong>
+        </p>
+        <ul>
+          <li>
+            Spin "0" or "00": Receive 2x your bet, and the counter remains
+            active.
+          </li>
+          <li>Counter reaches exactly 45: Bet pays out at 10-1.</li>
+          <li>Counter exceeds 45: The bet is lost, and the counter resets.</li>
+        </ul>
+        <p>
+          <strong>Key Details:</strong> The bet remains active until the counter
+          either reaches or exceeds 45.
+        </p>
+
+        <h4>Examples:</h4>
+        <ol>
+          <li>
+            <strong>Example 1:</strong>
+            <ul>
+              <li>Bet: $5</li>
+              <li>Spin: 17 (Counter = 17). Bet still active.</li>
+              <li>
+                Spin: "00" (Counter = 17). Player receives $10. Bet still
+                active.
+              </li>
+              <li>Spin: 21 (Counter = 38). Bet still active.</li>
+              <li>Spin: 10 (Counter = 48). Bet lost.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Example 2:</strong>
+            <ul>
+              <li>Bet: $5</li>
+              <li>Spin: 5 (Counter = 5). Bet still active.</li>
+              <li>Spin: 30 (Counter = 35). Bet still active.</li>
+              <li>Spin: 10 (Counter = 45). Player wins $50.</li>
+            </ul>
+          </li>
+        </ol>
+        <p>
+          <strong>House Advantage:</strong> 10.151% based on a double-zero
+          wheel. <strong>Note:</strong> This simulation is a highly simplified
+          version of roulette. You must place a Spinning 45s bet to keep the
+          counter active
+        </p>
+      </div>
+
       <table class="roulette-table">
         <tbody>
           <!-- Top row: "00" at far left top, then left column numbers horizontally -->
