@@ -124,3 +124,17 @@ h2 {
   text-align: center;
   margin-bottom: 10px;
 }
+.unique-sidebet {
+  background-color: #ffa500; /* Bright orange for uniqueness */
+  color: black;
+  font-weight: bold;
+  border: 3px solid #ff4500; /* Red-orange border */
+  text-align: center;
+  vertical-align: middle;
+  border-radius: 5px; /* Rounded corners */
+}
+
+.unique-sidebet:hover {
+  background-color: #ffcc66; /* Lighter orange on hover */
+  cursor: pointer;
+}
