@@ -6,8 +6,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const chips = document.querySelectorAll(".chip");
   const timerDisplay = document.createElement("h2");
   const balanceDisplay = document.createElement("h2");
-  document.body.prepend(balanceDisplay); // Add balance display to the top of the page
-  document.body.prepend(timerDisplay); // Add timer display above the balance display
+  const spinning45sCounterDisplay = document.createElement("div");
+  spinning45sCounterDisplay.id = "spinning-45s-counter-display";
+  document.body.prepend(balanceDisplay);
+  document.body.prepend(timerDisplay);
+  document.body.prepend(spinning45sCounterDisplay);
 
   const wheelNumbers = [
     "00",
@@ -49,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "35",
     "36",
   ];
+
   const redNumbers = [
     "1",
     "3",
@@ -69,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "34",
     "36",
   ];
+
   const blackNumbers = [
     "2",
     "4",
@@ -91,35 +96,44 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   const payouts = {
-    single: 35, // 35:1 payout for single numbers
-    "1st12": 2, // 2:1 payout for dozen bets
-    "2nd12": 2,
-    "3rd12": 2,
-    "1-18": 1, // 1:1 payout for low/high, odd/even, red/black
-    "19-36": 1,
-    even: 1,
-    odd: 1,
-    red: 1,
-    black: 1,
-    "2to1-left": 2, // 2:1 payout for column bets
-    "2to1-middle": 2,
-    "2to1-right": 2,
+    single: 35, // Straight
+    split: 17,
+    street: 11,
+    corner: 8,
+    line: 5,
+    color: 1, // Red/Black
+    oddEven: 1, // Odd/Even
+    highLow: 1, // High (19-36) / Low (1-18)
+    dozen: 2, // Dozen (1-12, 13-24, 25-36)
+    column: 2, // Column
+    spinning45s: 10, // Payout for hitting exactly 45
   };
 
-  let countdownTime = 10; // 10 seconds for placing bets
-  let selectedChipValue = 1; // Default chip value
-  let bets = {}; // Store bets placed on each spot
-  let balance = 10000; // Starting balance
+  let countdownTime = 10;
+  let selectedChipValue = 1;
+  let bets = {};
+  let balance = 10000;
+  let spinning45sCounter = 0;
+  let spinning45sActive = false;
 
-  // Update balance display
   function updateBalanceDisplay() {
     balanceDisplay.textContent = `Balance: $${balance}`;
   }
 
-  // Initialize balance display
-  updateBalanceDisplay();
+  function updateSpinning45sCounter(state = "active") {
+    if (state === "active") {
+      spinning45sCounterDisplay.innerHTML = `<h2 style="color: orange;">Spinning 45s Counter: ${spinning45sCounter}</h2>`;
+    } else if (state === "win") {
+      spinning45sCounterDisplay.innerHTML = `<h2 style="color: green;">Spinning 45s WON! Counter Reset.</h2>`;
+    } else if (state === "lost") {
+      spinning45sCounterDisplay.innerHTML = `<h2 style="color: red;">Spinning 45s LOST! Counter Reset.</h2>`;
+    }
+  }
 
-  // Style the numbers dynamically
+  updateBalanceDisplay();
+  updateSpinning45sCounter();
+
+  // Style numbers dynamically
   betSpots.forEach((spot) => {
     const number = spot.dataset.number;
 
@@ -135,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Select a chip value
   chips.forEach((chip) => {
     chip.addEventListener("click", () => {
       selectedChipValue = parseInt(chip.dataset.value, 10);
@@ -145,23 +158,19 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Place bets on the layout
   betSpots.forEach((spot) => {
     spot.addEventListener("click", () => {
       const spotKey = spot.dataset.number || spot.dataset.bet;
 
-      // Initialize bet if not already placed
       if (!bets[spotKey]) bets[spotKey] = 0;
       bets[spotKey] += selectedChipValue;
 
-      // Deduct from balance
       if (balance - selectedChipValue < 0) {
         alert("Not enough balance!");
         return;
       }
       balance -= selectedChipValue;
 
-      // Visualize the chip on the spot
       let chipIndicator = spot.querySelector(".chip-indicator");
       if (!chipIndicator) {
         chipIndicator = document.createElement("div");
@@ -169,74 +178,111 @@ document.addEventListener("DOMContentLoaded", () => {
         spot.appendChild(chipIndicator);
       }
       chipIndicator.textContent = `$${bets[spotKey]}`;
-
       console.log(
         `Placed $${selectedChipValue} on ${spotKey}, total: $${bets[spotKey]}`
       );
       updateBalanceDisplay();
+
+      if (spotKey === "spinning45s" && !spinning45sActive) {
+        spinning45sActive = true;
+        console.log("Spinning 45s bet placed and activated!");
+      }
     });
   });
 
-  // Randomly select a winning number
-  function getRandomWinningNumber() {
-    const randomIndex = Math.floor(Math.random() * wheelNumbers.length);
-    return wheelNumbers[randomIndex];
+  function resolveSpinning45s(winningNumber) {
+    const value = parseInt(winningNumber) || 0;
+    spinning45sCounter += value;
+
+    if (value === 0 && spinning45sActive && bets["spinning45s"]) {
+      balance += bets["spinning45s"] * 2;
+      console.log("Spinning 45s: Hit 0 or 00. Bet remains active.");
+    } else if (spinning45sCounter === 45) {
+      if (spinning45sActive && bets["spinning45s"]) {
+        balance += bets["spinning45s"] * (payouts.spinning45s + 1);
+        console.log("Spinning 45s: Counter hit exactly 45. Bet won!");
+      }
+      spinning45sCounter = 0;
+      spinning45sActive = false;
+      bets["spinning45s"] = 0;
+      updateSpinning45sCounter("win");
+    } else if (spinning45sCounter > 45) {
+      spinning45sCounter = 0;
+      spinning45sActive = false;
+      bets["spinning45s"] = 0;
+      updateSpinning45sCounter("lost");
+      console.log("Spinning 45s: Counter exceeded 45. Bet lost.");
+    } else {
+      updateSpinning45sCounter("active");
+      console.log(
+        `Spinning 45s: Counter updated to ${spinning45sCounter}. Bet still active.`
+      );
+    }
+
+    updateBalanceDisplay();
   }
 
-  // Resolve bets and calculate winnings
   function resolveBets(winningNumber) {
-    console.log(`Resolving bets for winning number: ${winningNumber}`);
-    betSpots.forEach((spot) => {
-      spot.classList.remove("winner"); // Clear previous highlights
-      const spotKey = spot.dataset.number || spot.dataset.bet;
+    resolveSpinning45s(winningNumber);
 
-      // If no bet was placed, ensure it is treated as zero
+    // Highlight winning spots and calculate payouts
+    betSpots.forEach((spot) => {
+      spot.classList.remove("winner");
+      const spotKey = spot.dataset.number || spot.dataset.bet;
       const betAmount = bets[spotKey] || 0;
 
-      // Highlight inside bets
-      if (spotKey === winningNumber) {
-        spot.classList.add("winner");
-        balance += betAmount * (payouts.single + 1); // Add original bet and payout
-      }
-
-      // Highlight relevant outside bets
-      if (redNumbers.includes(winningNumber) && spotKey === "red") {
-        spot.classList.add("winner");
-        balance += betAmount * (payouts.red + 1);
-      } else if (blackNumbers.includes(winningNumber) && spotKey === "black") {
-        spot.classList.add("winner");
-        balance += betAmount * (payouts.black + 1);
-      } else if (
-        parseInt(winningNumber) % 2 === 0 &&
-        parseInt(winningNumber) > 0 &&
-        spotKey === "even"
-      ) {
-        spot.classList.add("winner");
-        balance += betAmount * (payouts.even + 1);
-      } else if (parseInt(winningNumber) % 2 !== 0 && spotKey === "odd") {
-        spot.classList.add("winner");
-        balance += betAmount * (payouts.odd + 1);
-      } else if (
-        parseInt(winningNumber) >= 1 &&
-        parseInt(winningNumber) <= 18 &&
-        spotKey === "1-18"
-      ) {
-        spot.classList.add("winner");
-        balance += betAmount * (payouts["1-18"] + 1);
-      } else if (
-        parseInt(winningNumber) >= 19 &&
-        parseInt(winningNumber) <= 36 &&
-        spotKey === "19-36"
-      ) {
-        spot.classList.add("winner");
-        balance += betAmount * (payouts["19-36"] + 1);
+      if (betAmount > 0) {
+        if (spotKey === winningNumber) {
+          spot.classList.add("winner");
+          balance += betAmount * (payouts.single + 1);
+        } else if (
+          (redNumbers.includes(winningNumber) && spotKey === "red") ||
+          (blackNumbers.includes(winningNumber) && spotKey === "black") ||
+          (parseInt(winningNumber) >= 1 &&
+            parseInt(winningNumber) <= 18 &&
+            spotKey === "1-18") ||
+          (parseInt(winningNumber) >= 19 &&
+            parseInt(winningNumber) <= 36 &&
+            spotKey === "19-36") ||
+          (parseInt(winningNumber) % 2 === 0 &&
+            parseInt(winningNumber) > 0 &&
+            spotKey === "even") ||
+          (parseInt(winningNumber) % 2 !== 0 && spotKey === "odd")
+        ) {
+          spot.classList.add("winner");
+          balance += betAmount * (payouts.color + 1);
+        } else if (
+          spotKey === "2to1-left" &&
+          [
+            "3",
+            "6",
+            "9",
+            "12",
+            "15",
+            "18",
+            "21",
+            "24",
+            "27",
+            "30",
+            "33",
+            "36",
+          ].includes(winningNumber)
+        ) {
+          spot.classList.add("winner");
+          balance += betAmount * (payouts.column + 1);
+        }
+        // Add other bet types (split, corner, line, etc.)
       }
     });
 
     updateBalanceDisplay();
   }
 
-  // Countdown timer logic
+  function getRandomWinningNumber() {
+    const randomIndex = Math.floor(Math.random() * wheelNumbers.length);
+    return wheelNumbers[randomIndex];
+  }
+
   function startCountdown() {
     timerDisplay.textContent = `Place your bets! Time left: ${countdownTime}s`;
     const timerInterval = setInterval(() => {
@@ -247,32 +293,34 @@ document.addEventListener("DOMContentLoaded", () => {
         clearInterval(timerInterval);
         timerDisplay.textContent = "No more bets!";
         const winningNumber = getRandomWinningNumber();
-        console.log(`Winning number: ${winningNumber}`);
         winningNumberDisplay.textContent = `Winning Number: ${winningNumber}`;
         resolveBets(winningNumber);
-
-        // Reset the game after showing results
-        setTimeout(() => {
-          resetGame();
-        }, 5000);
+        setTimeout(() => resetGame(), 5000);
       }
     }, 1000);
   }
 
-  // Reset the game for the next round
   function resetGame() {
-    console.log("Resetting game...");
-    countdownTime = 10; // Reset timer
-    bets = {}; // Clear bets
-    betSpots.forEach((spot) => {
-      spot.classList.remove("winner");
-      const chipIndicator = spot.querySelector(".chip-indicator");
-      if (chipIndicator) chipIndicator.remove(); // Remove visual chips
+    countdownTime = 10;
+
+    Object.keys(bets).forEach((key) => {
+      if (key !== "spinning45s") bets[key] = 0;
     });
+
+    if (!spinning45sActive) {
+      spinning45sCounter = 0;
+      updateSpinning45sCounter("active");
+    }
+
+    betSpots.forEach((spot) => {
+      const chipIndicator = spot.querySelector(".chip-indicator");
+      if (chipIndicator && !bets[spot.dataset.bet]) chipIndicator.remove();
+      spot.classList.remove("winner");
+    });
+
     winningNumberDisplay.textContent = "Winning Number: -";
-    startCountdown(); // Start the next round
+    startCountdown();
   }
 
-  // Start the countdown for the first round
   startCountdown();
 });
