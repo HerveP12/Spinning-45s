@@ -180,15 +180,28 @@ document.addEventListener("DOMContentLoaded", () => {
     spot.addEventListener("click", () => {
       const spotKey = spot.dataset.number || spot.dataset.bet;
 
-      if (!bets[spotKey]) bets[spotKey] = 0;
-      bets[spotKey] += selectedChipValue;
+      // Restrict additional bets only if the counter is active
+      if (spotKey === "spinning45s" && spinning45sActive) {
+        alert(
+          "Spinning 45s bet is already active. Please wait for it to resolve."
+        );
+        return;
+      }
 
+      // Initialize the bet amount if not already set
+      if (!bets[spotKey]) bets[spotKey] = 0;
+
+      // Check if there's enough balance for the bet
       if (balance - selectedChipValue < 0) {
         alert("Not enough balance!");
         return;
       }
+
+      // Deduct balance and update the bet
+      bets[spotKey] += selectedChipValue;
       balance -= selectedChipValue;
 
+      // Update chip indicator for the spot
       let chipIndicator = spot.querySelector(".chip-indicator");
       if (!chipIndicator) {
         chipIndicator = document.createElement("div");
@@ -201,9 +214,9 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       updateBalanceDisplay();
 
-      if (spotKey === "spinning45s" && !spinning45sActive) {
-        spinning45sActive = true;
-        console.log("Spinning 45s bet placed and activated!");
+      // Log the initial bet placement
+      if (spotKey === "spinning45s") {
+        console.log("Spinning 45s initial bet placed.");
       }
     });
   });
@@ -238,13 +251,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function resolveSpinning45s(winningNumber) {
     const value = parseInt(winningNumber) || 0;
+
+    // Activate spinning45s logic after the first spin
+    if (bets["spinning45s"] && !spinning45sActive) {
+      spinning45sActive = true;
+      console.log("Spinning 45s bet is now active.");
+    }
+
     spinning45sCounter += value;
 
-    if (value === 0 && spinning45sActive && bets["spinning45s"]) {
+    if (value === 0 && spinning45sActive) {
       balance += bets["spinning45s"] * 2;
       console.log("Spinning 45s: Hit 0 or 00. Bet remains active.");
     } else if (spinning45sCounter === 45) {
-      if (spinning45sActive && bets["spinning45s"]) {
+      if (spinning45sActive) {
         balance += bets["spinning45s"] * (payouts.spinning45s + 1);
         console.log("Spinning 45s: Counter hit exactly 45. Bet won!");
       }
